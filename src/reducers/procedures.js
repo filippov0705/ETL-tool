@@ -3,6 +3,7 @@ import {
   ADD_TASK,
   CLEAR_TARGET_PROCEDURE,
   CLEAR_PROCEDURE_HEADS,
+  CHANGE_TASK_SETTINGS,
   EDIT_SCHEDULE,
   EDIT_PROCEDURE_NAME,
   GET_PROCEDURES_HEADS,
@@ -13,13 +14,11 @@ import {
   REMOVE_CHOSEN_TASK,
   NEW_PROCEDURE_CREATE
 } from "../action/ProceduresActions";
-import { mockData } from "./mockData";
 
 const initialState = () => {
   return {
-    userId: mockData.user_id,
-    list: null,
-    targetProcedure: null,
+    list: undefined,
+    targetProcedure: undefined,
     snackMessage: {},
   };
 };
@@ -31,6 +30,17 @@ export function proceduresReducer(state = initialState(), action) {
         ...state,
         list: [...state.list, action.payload]
       };
+
+    case CHANGE_TASK_SETTINGS:
+      const procedureWithChangedSettings = state.targetProcedure;
+      procedureWithChangedSettings.tasks = state.targetProcedure.tasks.map(item => {
+        if (item.id === action.payload.taskId) {
+          item.settings[ action.payload.newSettings.parameter] = action.payload.newSettings.newValue;
+        }
+        return item;
+      });
+
+      return { ...state, targetProcedure: procedureWithChangedSettings };
 
     case PROCEDURE_RUN:
       return { ...state, snackMessage: action.payload };

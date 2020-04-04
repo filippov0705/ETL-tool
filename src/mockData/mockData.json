@@ -1,2 +1,0 @@
-[{"userId":19128378,"data":[{"name":"Procedure-45733782","id":66537335,"schedule":[],"tasks":[{"name":"Read CSV from FTP","id":21318054,"settings":{"host":"test.rebex.net","user":"demo","password":"password","name":"readme.txt"}},{"name":"Mail Text","id":96501008,"settings":{"Email":"filippov0705@gmail.com"}}]},{"name":"Procedure-97634377","id":11942958,"schedule":[],"tasks":[{"name":"Read Excel","id":23354291,"settings":{"from":"userOne/mockData"}},{"name":"Mail Excel","id":78885278,"settings":{}}]}]}]
-

@@ -26,14 +26,14 @@ const DatePicker = props => {
   const { classes, forwardRef } = props;
 
   const handleDateChange = date => {
-    props.dateChange([date.getFullYear(), date.getMonth() + 1, date.getDate()]);
+    props.dateChange({ year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate()});
     if (forwardRef.current)
       forwardRef.current.getElementsByTagName("button")[0].click();
   };
 
   const getCurrentDate = () => {
     if (props.date.length) {
-      return `${props.date[0]}/${props.date[1]}/${props.date[2]}`;
+      return `${props.date.year}/${props.date.month}/${props.date.day}`;
     }
     return `${new Date().getFullYear()}/${new Date().getMonth() +
       1}/${new Date().getDate()}`;

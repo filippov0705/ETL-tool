@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { FormattedMessage } from "react-intl";
 
@@ -63,187 +63,170 @@ const styles = theme => ({
   }
 });
 
-class InfoProcedure extends Component {
-  constructor() {
-    super();
-    this.state = {
-      settings: "",
-      timerId: null,
-      openedItems: []
-    };
-  }
+const InfoProcedure = props => {
+  const [openedItems, setOpenedItems] = useState([]);
+  const { classes } = props;
 
-  componentDidMount() {
-    this.props.getTargetProcedure(
-      this.props.userId,
-      this.props.match.params.id
+
+  useEffect(() => {
+    props.getTargetProcedure(
+        props.match.params.id
     );
-  }
+  }, []);
 
-  getItemField = (attributeToChange, i, item) => {
+  if (!props.targetProcedure) return null;
+
+  const getItemField = (attributeToChange, i, item) => {
     return (
-      <InfoButtons
-        isdisabled={!this.props.roles.includes("user")}
-        key={i}
-        id={item.id}
-        changeTaskSettings={this.changeTaskSettings}
-        value={item.settings || ""}
-        changeItemSettings={this.changeItemSettings}
-        attributeToChange={attributeToChange}
-        tooltipText={<FormattedMessage id={`info.${item}`} />}
-      />
+        <InfoButtons
+            isdisabled={!props.roles.includes("user")}
+            key={i}
+            id={item.id}
+            changeTaskSettings={changeTaskSettings}
+            value={item.settings || ""}
+            attributeToChange={attributeToChange}
+            tooltipText={<FormattedMessage id={`info.${item}`} />}
+        />
     );
   };
 
-  deleteProcedure = () => {
+  const deleteProcedure = () => {
     fetch(
-      `http://localhost:3001/api/procedures/${this.props.match.params.id}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8"
+        `http://localhost:3001/api/procedures/${props.match.params.id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json;charset=utf-8"
+          }
         }
-      }
     ).then(() => {
       history.replace("/Procedures/");
     });
   };
 
-  procedureRun = () => {
-    this.props.procedureRun(null, this.props.match.params.id);
+  const procedureRun = () => {
+    props.procedureRun(props.match.params.id);
   };
 
-  changeTaskSettings = (id, value) => {
-    this.props.changeTaskSettings(
-      this.props.userId,
-      this.props.match.params.id,
-      id,
-      value
+  const changeTaskSettings = (id, value) => {
+    props.changeTaskSettings(
+        props.match.params.id,
+        id,
+        value
     );
   };
 
-  getItemSettingsBar = item => {
-    const { classes } = this.props;
+  const getItemSettingsBar = item => {
     if (!item.settings || !Object.keys(item.settings).length) {
       return null;
     }
 
     return (
-      <React.Fragment>
-        <Grid item xs={1} className={classes.chevron}>
-          {this.state.openedItems.includes(item.id) ? (
-            <KeyboardArrowUpIcon
-              onClick={() => {
-                this.toggleItemAppearance(item.id);
-              }}
-            />
-          ) : (
-            <KeyboardArrowDownIcon
-              onClick={() => {
-                this.toggleItemAppearance(item.id);
-              }}
-            />
-          )}
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          className={
-            this.state.openedItems.includes(item.id)
-              ? classes.grid
-              : classes.hidden
-          }
-        >
-          {Object.keys(item.settings).map((value, i) => {
-            return this.getItemField(value, i, item);
-          })}
-        </Grid>
-      </React.Fragment>
+        <React.Fragment>
+          <Grid item xs={1} className={classes.chevron}>
+            {openedItems.includes(item.id) ? (
+                <KeyboardArrowUpIcon
+                    onClick={() => {
+                      toggleItemAppearance(item.id);
+                    }}
+                />
+            ) : (
+                <KeyboardArrowDownIcon
+                    onClick={() => {
+                      toggleItemAppearance(item.id);
+                    }}
+                />
+            )}
+          </Grid>
+          <Grid
+              item
+              xs={12}
+              className={
+                openedItems.includes(item.id)
+                    ? classes.grid
+                    : classes.hidden
+              }
+          >
+            {Object.keys(item.settings).map((value, i) => getItemField(value, i, item))}
+          </Grid>
+        </React.Fragment>
     );
   };
 
-  toggleItemAppearance = id => {
-    if (this.state.openedItems.includes(id)) {
-      this.setState({
-        openedItems: this.state.openedItems.filter(item => item !== id)
-      });
+  const toggleItemAppearance = id => {
+    if (openedItems.includes(id)) {
+        setOpenedItems(openedItems.filter(item => item !== id));
     } else {
-      this.setState({ openedItems: [...this.state.openedItems, id] });
+      setOpenedItems([...openedItems, id] );
     }
   };
 
-  itemCreation = classes => {
-    if (!this.props.targetProcedure.tasks.length) {
+  const itemCreation = () => {
+    if (!props.targetProcedure.tasks.length) {
       return (
-        <div className={classes.message}>
-          <span>Selected procedure does not contain tasks.</span>
-          <span>Add tasks to procedure on details page</span>
-        </div>
+          <div className={classes.message}>
+            <span>Selected procedure does not contain tasks.</span>
+            <span>Add tasks to procedure on details page</span>
+          </div>
       );
     }
 
-    return this.props.targetProcedure.tasks.map((item, i) => {
+    return props.targetProcedure.tasks.map((item, i) => {
       return (
-        <Item
-          name={item.name}
-          id={item.id}
-          key={i}
-          labelAction={this.toggleItemAppearance}
-        >
-          {this.getItemSettingsBar(item)}
-        </Item>
+          <Item
+              name={item.name}
+              id={item.id}
+              key={i}
+              labelAction={toggleItemAppearance}
+          >
+            {getItemSettingsBar(item)}
+          </Item>
       );
     });
   };
 
-  render() {
-    const { classes } = this.props;
-
-    if (!this.props.targetProcedure) return null;
-
-    return (
+  return (
       <ProcedurePage>
         <Heading
-          heading={this.props.targetProcedure.name}
-          size="big"
-          background="pageLabel"
+            heading={props.targetProcedure.name}
+            size="big"
+            background="pageLabel"
         />
         <Tabs
-          data={"info"}
-          id={this.props.match.params.id}
-          deleteProcedure={this.deleteProcedure}
-          procedureRun={this.procedureRun}
-          isDisabled={!this.props.roles.includes(USER)}
+            data="info"
+            id={props.match.params.id}
+            deleteProcedure={deleteProcedure}
+            procedureRun={procedureRun}
+            isDisabled={!props.roles.includes(USER)}
         />
         <ProcedureList
-          isFullPageWidth={true}
-          data={this.props.targetProcedure.tasks}
-          className="listStyle"
-          needBtns={true}
+            isFullPageWidth
+            data={props.targetProcedure.tasks}
+            className="listStyle"
+            needBtns
         >
-          {this.itemCreation(classes)}
+          {itemCreation()}
         </ProcedureList>
       </ProcedurePage>
-    );
-  }
-}
+  );
+
+};
 
 const mapDispatchToProps = dispatch => {
   return {
-    getTargetProcedure: (userId, procedureId) =>
-      dispatch(getTargetProcedure(userId, procedureId)),
-    changeTaskSettings: (userId, procedureId, taskId, newSettings) =>
-      dispatch(changeTaskSettings(userId, procedureId, taskId, newSettings)),
-    procedureRun: (userId, procedureId) =>
-      dispatch(procedureRun(userId, procedureId))
+    getTargetProcedure: procedureId =>
+      dispatch(getTargetProcedure(procedureId)),
+    changeTaskSettings: (procedureId, taskId, newSettings) =>
+      dispatch(changeTaskSettings(procedureId, taskId, newSettings)),
+    procedureRun: procedureId =>
+      dispatch(procedureRun(procedureId))
   };
 };
 
 const mapStateToProps = store => {
   return {
     targetProcedure: store.procedures.targetProcedure,
-    userId: store.procedures.userId,
     roles: store.app.roles
   };
 };

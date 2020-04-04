@@ -130,7 +130,6 @@ const Procedures = props => {
 const mapStateToProps = store => {
   return {
     list: store.procedures.list,
-    userId: store.procedures.userId,
     roles: store.app.roles
   };
 };

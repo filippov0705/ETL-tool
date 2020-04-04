@@ -1,6 +1,8 @@
 export const ADD_TASK = "ADD_TASK";
 export const ADD_NEW_SCHEDULE = "ADD_NEW_SCHEDULE";
 export const CLEAR_TARGET_PROCEDURE = "CLEAR_TARGET_PROCEDURE";
+export const CLEAR_PROCEDURE_HEADS = "CLEAR_PROCEDURE_HEADS";
+export const CHANGE_TASK_SETTINGS = "CHANGE_TASK_SETTINGS";
 export const PROCEDURE_DELETE = "PROCEDURE_DELETE";
 export const EDIT_PROCEDURE_NAME = "EDIT_PROCEDURE_NAME";
 export const EDIT_SCHEDULE = "EDIT_SCHEDULE";
@@ -10,8 +12,6 @@ export const NEW_PROCEDURE_CREATE = "NEW_PROCEDURE_CREATE";
 export const PROCEDURE_RUN = "PROCEDURE_RUN";
 export const REMOVE_SCHEDULE = "REMOVE_SCHEDULE";
 export const REMOVE_CHOSEN_TASK = "REMOVE_CHOSEN_TASK";
-export const SET_LOG = "SET_LOG";
-export const CLEAR_PROCEDURE_HEADS = "CLEAR_PROCEDURE_HEADS"
 
 export function getProceduresHeads(filterValue) {
   return dispatch => {
@@ -62,7 +62,7 @@ export function procedureDelete(procedureId) {
   };
 }
 
-export function newProcedureCreate(userID, newProcedure) {
+export function newProcedureCreate(newProcedure) {
   return dispatch => {
     fetch(`http://localhost:3001/api/procedures`, {
       method: "POST",
@@ -80,7 +80,7 @@ export function newProcedureCreate(userID, newProcedure) {
   };
 }
 
-export function getTargetProcedure(userId, procedureId) {
+export function getTargetProcedure(procedureId) {
   return dispatch => {
     fetch(`http://localhost:3001/api/procedures/${procedureId}`, {
       method: "GET",
@@ -96,7 +96,7 @@ export function getTargetProcedure(userId, procedureId) {
   };
 }
 
-export function removeSchedule(userId, procedureId, scheduleId) {
+export function removeSchedule(procedureId, scheduleId) {
   return dispatch => {
     fetch(
       `http://localhost:3001/api/procedures/${procedureId}/schedules/${scheduleId}`,
@@ -145,7 +145,7 @@ export function editSchedule(procedureId, scheduleId, editableSchedule) {
   };
 }
 
-export function editProcedureName(userId, procedureId, newName) {
+export function editProcedureName(procedureId, newName) {
   return dispatch => {
     fetch(`http://localhost:3001/api/procedures/${procedureId}`, {
       method: "PATCH",
@@ -169,7 +169,7 @@ export function editProcedureName(userId, procedureId, newName) {
   };
 }
 
-export function addTask(userId, procedureId, newTask) {
+export function addTask(procedureId, newTask) {
   return dispatch => {
     fetch(`http://localhost:3001/api/procedures/${procedureId}/tasks`, {
       method: "POST",
@@ -187,7 +187,7 @@ export function addTask(userId, procedureId, newTask) {
   };
 }
 
-export function removeTask(userId, procedureId, taskId) {
+export function removeTask(procedureId, taskId) {
   return dispatch => {
     fetch(
       `http://localhost:3001/api/procedures/${procedureId}/tasks/${taskId}`,
@@ -206,21 +206,19 @@ export function removeTask(userId, procedureId, taskId) {
   };
 }
 
-export function setLog() {
-  return {
-    type: SET_LOG,
-    payload: ""
-  };
-}
-
-export function changeTaskSettings(userId, procedureId, taskId, newSettings) {
+export function changeTaskSettings(procedureId, taskId, newSettings) {
   return dispatch => {
     fetch(`http://localhost:3001/api/procedures/info`, {
       method: "PUT",
       credentials: "include",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ procedureId, userId, taskId, newSettings })
-    });
+      body: JSON.stringify({ procedureId, taskId, newSettings })
+    }).then(() => {
+      dispatch({
+        type: CHANGE_TASK_SETTINGS,
+        payload: { taskId, newSettings }
+      });
+    })
   };
 }
 

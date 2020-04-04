@@ -37,12 +37,12 @@ const TimePicker = props => {
   const { classes, forwardRef, radio } = props;
 
   const handleDateChange = date => {
-    props.timeChange([date.getHours(), date.getMinutes()]);
+    props.timeChange({ hour: date.getHours(), minute: date.getMinutes()});
   };
 
   const getCurrentTime = () => {
-    if (props.time.length) {
-      return `Wed Jan 08 2020 ${props.time[0]}:${props.time[1]}:00 GMT+0300 (Moscow Standard Time)`;
+    if (props.time.hour) {
+      return `Wed Jan 08 2020 ${props.time.hour}:${props.time.minute}:00 GMT+0300 (Moscow Standard Time)`;
     }
     return DEFAULT_TIME;
   };

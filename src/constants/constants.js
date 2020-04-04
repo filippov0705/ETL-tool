@@ -17,8 +17,8 @@ export const THUSDAY_ABBREVIATED = "Thu";
 export const THUSDAY = "thursday";
 export const TIME_PICKER = "TimePicker";
 export const TO = "To:";
-export const WEDNSDAY_ABBREVIATED = "Wed";
-export const WEDNSDAY = "wednsday";
+export const WEDNESDAY_ABBREVIATED = "Wed";
+export const WEDNESDAY = "wednesday";
 export const FRIDAY_ABBREVIATED = "Fri";
 export const FRIDAY = "friday";
 export const FROM_EARLIEST = "From the earliest";
@@ -41,7 +41,7 @@ export const LOGS_ON_PAGE = "Logs on page:";
 export const DAYS_OF_THE_WEEK_ABBREVIATED = [
   MONDAY_ABBREVIATED,
   TUESDAY_ABBREVIATED,
-  WEDNSDAY_ABBREVIATED,
+  WEDNESDAY_ABBREVIATED,
   THUSDAY_ABBREVIATED,
   FRIDAY_ABBREVIATED,
   SATURDAY_ABBREVIATED,
@@ -50,7 +50,7 @@ export const DAYS_OF_THE_WEEK_ABBREVIATED = [
 export const DAYS_OF_THE_WEEK = [
   MONDAY,
   TUESDAY,
-  WEDNSDAY,
+  WEDNESDAY,
   THUSDAY,
   FRIDAY,
   SATURDAY,

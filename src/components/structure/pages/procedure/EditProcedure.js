@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import randomInt from "random-int";
 
@@ -46,174 +46,165 @@ const styles = theme => ({
   }
 });
 
-class EditProcedure extends Component {
-  constructor() {
-    super();
-    this.state = {
-      selectedTasks: [],
-      name: "",
-      timerId: null
-    };
-  }
+const EditProcedure = props => {
+  const [name, setName] = useState("");
+  const [timerId, setTimerId] = useState(null)
+  const { classes, targetProcedure, getTargetProcedure } = props;
 
-  componentDidMount() {
-    this.props.getTargetProcedure(
-      this.props.userId,
-      this.props.match.params.id
+  useEffect(() => {
+    getTargetProcedure(
+        props.match.params.id
     );
-    this.props.getPossibleTasks();
-  }
+    props.getPossibleTasks();
+  }, []);
 
-  componentDidUpdate(prevProps) {
-    if (this.props.targetProcedure !== prevProps.targetProcedure) {
-      this.setState({ name: this.props.targetProcedure.name });
-    }
-  }
+  useEffect(() => {
+    setName(targetProcedure.name);
+  }, [props.targetProcedure.name]);
 
-  nameChange = value => {
-    if (!this.props.roles.includes(USER)) return;
-    if (this.state.timerId) clearTimeout(this.state.timerId);
+  const nameChange = value => {
+    if (!props.roles.includes(USER)) return;
+    if (timerId) clearTimeout(timerId);
     const name = value.substr(0, 35);
-    this.setState({ name });
-    this.procedureNameChange();
+    setName(name);
+    procedureNameChange();
   };
 
-  procedureNameChange = () => {
+  const procedureNameChange = () => {
     const timerId = setTimeout(() => {
-      this.props.editProcedureName(
-        this.props.userId,
-        this.props.match.params.id,
-        this.state.name || `Procedure-${randomInt(10000000, 99999999)}`
+      props.editProcedureName(
+          props.match.params.id,
+          name || `Procedure-${randomInt(10000000, 99999999)}`
       );
     }, 5000);
-    this.setState({ timerId });
+    setTimerId(timerId);
   };
 
-  blurAction = () => {
-    if (!this.props.roles.includes(USER)) return;
-    if (this.state.timerId) clearTimeout(this.state.timerId);
+  const blurAction = () => {
+    if (!props.roles.includes(USER)) return;
+    if (timerId) clearTimeout(timerId);
 
-    this.props.editProcedureName(
-      this.props.userId,
-      this.props.match.params.id,
-      this.state.name || `Procedure-${randomInt(10000000, 99999999)}`
+    props.editProcedureName(
+        props.match.params.id,
+        name || `Procedure-${randomInt(10000000, 99999999)}`
     );
   };
 
-  deleteProcedure = () => {
+  const deleteProcedure = () => {
     fetch(
-      `http://localhost:3001/api/procedures/${this.props.match.params.id}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8"
+        `http://localhost:3001/api/procedures/${props.match.params.id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json;charset=utf-8"
+          }
         }
-      }
     ).then(() => {
       history.replace("/Procedures/");
     });
   };
 
-  procedureRun = () => {
-    this.props.procedureRun(null, this.props.match.params.id);
+  const procedureRun = () => {
+    props.procedureRun(props.match.params.id);
   };
 
-  applyTask = id => {
-    if (!this.props.roles.includes(USER)) return;
-    this.props.addTask(this.props.userId, this.props.match.params.id, {
-      name: this.props.possible.find(item => item.id === id).name,
+  const applyTask = id => {
+    if (!props.roles.includes(USER)) return;
+    props.addTask(props.match.params.id, {
+      name: props.possible.find(item => item.id === id).name,
       id: randomInt(10000000, 99999999),
-      settings: this.props.possible.find(item => item.id === id).settings,
-      order: this.props.targetProcedure.tasks.length
+      settings: props.possible.find(item => item.id === id).settings,
+      order: props.targetProcedure.tasks.length
     });
   };
 
-  removeTask = id => {
-    if (!this.props.roles.includes(USER)) return;
-    this.props.removeTask(this.props.userId, this.props.match.params.id, id);
+  const removeTask = id => {
+    if (!props.roles.includes(USER)) return;
+    props.removeTask(props.match.params.id, id);
   };
 
-  itemCreation = (data, action) => {
+  const itemCreation = (data, action) => {
     return data.map((item, i) => {
       return <Item name={item.name} id={item.id} key={i} action={action} />;
     });
   };
 
-  render() {
-    if (!this.props.targetProcedure) return null;
-    const { classes } = this.props;
-
-    return (
+  return (
       <ProcedurePage>
         <Heading
-          heading={this.props.targetProcedure.name}
-          size="big"
-          background="pageLabel"
+            heading={props.targetProcedure.name}
+            size="big"
+            background="pageLabel"
         />
         <Tabs
-          data="edit"
-          id={this.props.match.params.id}
-          deleteProcedure={this.deleteProcedure}
-          procedureRun={this.procedureRun}
-          isDisabled={!this.props.roles.includes(USER)}
+            data="edit"
+            id={props.match.params.id}
+            deleteProcedure={deleteProcedure}
+            procedureRun={procedureRun}
+            isDisabled={!props.roles.includes(USER)}
         />
         <Grid container className={classes.input}>
           <Input
-            label="Change procedure name: "
-            value={this.state.name}
-            clickAction={this.nameChange}
-            blurAction={this.blurAction}
-            className="input"
-            labelClassName="label"
+              label="Change procedure name: "
+              value={name}
+              clickAction={nameChange}
+              blurAction={blurAction}
+              className="input"
+              labelClassName="label"
           />
         </Grid>
         <Grid className={classes.gridDisplay}>
           <ProcedureList
-            className="smallList"
-            isHeading="Available tasks"
-            background="middle_left"
+              className="smallList"
+              isHeading="Available tasks"
+              background="middle_left"
           >
-            {this.itemCreation(this.props.possible, this.applyTask)}
+            {itemCreation(props.possible, applyTask)}
           </ProcedureList>
           <ProcedureList
-            isHeading="Chosen tasks"
-            className="smallList"
-            background="middle_left"
+              isHeading="Chosen tasks"
+              className="smallList"
+              background="middle_left"
           >
-            {this.itemCreation(
-              this.props.targetProcedure.tasks,
-              this.removeTask
+            {itemCreation(
+                props.targetProcedure.tasks,
+                removeTask
             )}
           </ProcedureList>
         </Grid>
       </ProcedurePage>
-    );
-  }
-}
+  );
+};
+
+EditProcedure.defaultProps = {
+  targetProcedure: {
+    name: '',
+    tasks: [],
+  },
+};
 
 const mapStateToProps = store => {
   return {
     targetProcedure: store.procedures.targetProcedure,
-    userId: store.procedures.userId,
     possible: store.tasks.possible,
-    roles: store.app.roles
+    roles: store.app.roles,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    addTask: (userId, procedureId, newTask) =>
-      dispatch(addTask(userId, procedureId, newTask)),
-    removeTask: (userId, procedureId, taskId) =>
-      dispatch(removeTask(userId, procedureId, taskId)),
-    editProcedureName: (userId, procedureId, newName) =>
-      dispatch(editProcedureName(userId, procedureId, newName)),
-    getTargetProcedure: (userId, procedureId) =>
-      dispatch(getTargetProcedure(userId, procedureId)),
+    addTask: (procedureId, newTask) =>
+      dispatch(addTask(procedureId, newTask)),
+    removeTask: (procedureId, taskId) =>
+      dispatch(removeTask(procedureId, taskId)),
+    editProcedureName: (procedureId, newName) =>
+      dispatch(editProcedureName(procedureId, newName)),
+    getTargetProcedure: (procedureId) =>
+      dispatch(getTargetProcedure(procedureId)),
     getPossibleTasks: () => dispatch(getPossibleTasks()),
-    procedureRun: (userId, procedureId) =>
-      dispatch(procedureRun(userId, procedureId))
+    procedureRun: (procedureId) =>
+      dispatch(procedureRun(procedureId))
   };
 };
 

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { connect } from "react-redux";
 import randomInt from "random-int";
@@ -43,125 +43,107 @@ const styles = theme => ({
   }
 });
 
-class ProcedureAdd extends Component {
-  constructor() {
-    super();
-    this.state = {
-      selectedTasks: [],
-      name: ""
-    };
-  }
+const ProcedureAdd = props => {
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [name, setName] = useState("");
+  const { classes } = props;
 
-  componentDidMount() {
-    this.props.getPossibleTasks();
-  }
+  useEffect(() => {
+    props.getPossibleTasks();
+  }, []);
 
-  applyTask = id => {
-    this.setState({
-      selectedTasks: [
-        ...this.state.selectedTasks,
-        {
-          name: this.props.possible.find(item => item.id === id).name,
-          id: randomInt(10000000, 99999999),
-          settings: this.props.possible.find(item => item.id === id).settings
-        }
-      ]
-    });
+  const applyTask = id => {
+    setSelectedTasks([...selectedTasks,
+      {
+        name: props.possible.find(item => item.id === id).name,
+        id: randomInt(10000000, 99999999),
+        settings: props.possible.find(item => item.id === id).settings
+      }]);
   };
 
-  createProcedure = () => {
-    if (!this.props.roles.includes("user")) return;
+  const createProcedure = () => {
+    if (!props.roles.includes("user")) return;
     const newProcedure = {
-      name: this.state.name || `Procedure-${randomInt(10000000, 99999999)}`,
+      name: name || `Procedure-${randomInt(10000000, 99999999)}`,
       id: randomInt(10000000, 99999999),
       schedule: [],
-      tasks: this.state.selectedTasks
+      tasks: selectedTasks
     };
-    this.props.newProcedureCreate(this.props.userId, newProcedure);
+    props.newProcedureCreate(newProcedure);
   };
 
-  removeTask = id => {
-    this.setState({
-      selectedTasks: this.state.selectedTasks.filter(item => item.id !== id)
-    });
-  };
+  const removeTask = id => setSelectedTasks(selectedTasks.filter(item => item.id !== id));
 
-  nameChange = name => {
-    this.setState({ name });
-  };
+  const nameChange = name => setName(name);
 
-  itemCreation = (data, action) => {
+  const itemCreation = (data, action) => {
     return data.map((item, i) => {
       return <Item name={item.name} id={item.id} key={i} action={action} />;
     });
   };
 
-  render() {
-    const { classes } = this.props;
-
-    return (
+  return (
       <ProcedurePage>
         <Heading
-          size="big"
-          heading={<FormattedMessage id="procedure.newProcedure" />}
+            size="big"
+            heading={<FormattedMessage id="procedure.newProcedure" />}
         />
         <Grid className={classes.gridStyle}>
           <Input
-            label={<FormattedMessage id="label.procedureName" />}
-            value={this.state.name}
-            clickAction={this.nameChange}
-            className="input"
-            labelClassName="label"
+              label={<FormattedMessage id="label.procedureName" />}
+              value={name}
+              clickAction={nameChange}
+              className="input"
+              labelClassName="label"
           />
           <Button
-            looks={
-              this.props.roles.includes("user")
-                ? "applyBtn"
-                : "applyBtnDisabled"
-            }
-            linkTo={
-              this.props.roles.includes("user")
-                ? ProceduresPath()
-                : newProcedurePath()
-            }
-            btnAction={this.createProcedure}
+              looks={
+                props.roles.includes("user")
+                    ? "applyBtn"
+                    : "applyBtnDisabled"
+              }
+              linkTo={
+                props.roles.includes("user")
+                    ? ProceduresPath()
+                    : newProcedurePath()
+              }
+              btnAction={createProcedure}
           >
             <span>{<FormattedMessage id="procedure.save" />}</span>
           </Button>
         </Grid>
         <Grid className={classes.gridTasks}>
           <ProcedureList
-            isHeading={<FormattedMessage id="procedure.availableTasks" />}
-            className="smallList"
-            background="middle_left"
+              isHeading={<FormattedMessage id="procedure.availableTasks" />}
+              className="smallList"
+              background="middle_left"
           >
-            {this.itemCreation(this.props.possible, this.applyTask)}
+            {itemCreation(props.possible, applyTask)}
           </ProcedureList>
           <ProcedureList
-            isHeading={<FormattedMessage id="procedure.selectedTasks" />}
-            className="smallList"
-            background="middle_left"
+              isHeading={<FormattedMessage id="procedure.selectedTasks" />}
+              className="smallList"
+              background="middle_left"
           >
-            {this.itemCreation(this.state.selectedTasks, this.removeTask)}
+            {itemCreation(selectedTasks, removeTask)}
           </ProcedureList>
         </Grid>
       </ProcedurePage>
-    );
-  }
-}
+  );
+
+};
 
 const mapStateToProps = store => {
   return {
     possible: store.tasks.possible,
-    userId: store.procedures.userId,
     roles: store.app.roles
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    newProcedureCreate: (userId, newProcedure) =>
-      dispatch(newProcedureCreate(userId, newProcedure)),
+    newProcedureCreate: newProcedure =>
+      dispatch(newProcedureCreate(newProcedure)),
     getPossibleTasks: () => dispatch(getPossibleTasks())
   };
 };
